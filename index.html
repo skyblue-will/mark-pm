@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SitePM — Mark's Project Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-2: #232733;
+            --border: #2e3340;
+            --text: #f0f0f0;
+            --text-secondary: #8b8fa3;
+            --text-muted: #5c6070;
+            --accent: #f59e0b;
+            --accent-dim: rgba(245, 158, 11, 0.12);
+            --green: #22c55e;
+            --green-dim: rgba(34, 197, 94, 0.12);
+            --red: #ef4444;
+            --red-dim: rgba(239, 68, 68, 0.12);
+            --blue: #3b82f6;
+            --blue-dim: rgba(59, 130, 246, 0.12);
+            --orange: #f97316;
+            --orange-dim: rgba(249, 115, 22, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* Top nav */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            height: 56px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+            letter-spacing: -0.02em;
+        }
+
+        .logo span { color: var(--text-muted); font-weight: 400; }
+
+        .topbar-nav {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .topbar-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .topbar-nav a:hover { background: var(--surface-2); color: var(--text); }
+        .topbar-nav a.active { background: var(--accent-dim); color: var(--accent); }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        /* Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            min-height: calc(100vh - 56px);
+        }
+
+        .panel {
+            background: var(--bg);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .panel-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.15s;
+            cursor: pointer;
+        }
+
+        .card:hover { border-color: var(--accent); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .card-meta {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Status badges */
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .badge-active { background: var(--green-dim); color: var(--green); }
+        .badge-attention { background: var(--orange-dim); color: var(--orange); }
+        .badge-critical { background: var(--red-dim); color: var(--red); }
+        .badge-upcoming { background: var(--blue-dim); color: var(--blue); }
+        .badge-complete { background: var(--surface-2); color: var(--text-muted); }
+
+        /* Progress bar */
+        .progress-track {
+            height: 6px;
+            background: var(--surface-2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.green { background: var(--green); }
+        .progress-fill.amber { background: var(--accent); }
+        .progress-fill.red { background: var(--red); }
+        .progress-fill.blue { background: var(--blue); }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.35rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Stat row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .stat-number.green { color: var(--green); }
+        .stat-number.amber { color: var(--accent); }
+        .stat-number.red { color: var(--red); }
+        .stat-number.blue { color: var(--blue); }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-top: 0.15rem;
+        }
+
+        /* Snag list */
+        .snag-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .snag-item:last-child { border-bottom: none; }
+
+        .snag-priority {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 0.35rem;
+            flex-shrink: 0;
+        }
+
+        .snag-priority.high { background: var(--red); }
+        .snag-priority.medium { background: var(--accent); }
+        .snag-priority.low { background: var(--green); }
+
+        .snag-text {
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .snag-text .snag-title { font-weight: 500; }
+        .snag-text .snag-detail { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.15rem; }
+
+        .snag-age {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* Timeline */
+        .timeline-item {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.6rem 0;
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .timeline-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            margin-top: 0.3rem;
+            flex-shrink: 0;
+        }
+
+        .timeline-dot.active { background: var(--accent); }
+
+        .timeline-content {
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .timeline-content strong { color: var(--text); }
+        .timeline-content span { color: var(--text-secondary); }
+
+        /* Contractor row */
+        .contractor-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .contractor-row:last-child { border-bottom: none; }
+
+        .contractor-info {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .contractor-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+        }
+
+        .contractor-name { font-weight: 500; font-size: 0.85rem; }
+        .contractor-trade { font-size: 0.75rem; color: var(--text-secondary); }
+
+        /* Button */
+        .btn {
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn:hover { background: var(--surface-2); color: var(--text); }
+
+        .btn-accent {
+            background: var(--accent-dim);
+            border-color: transparent;
+            color: var(--accent);
+        }
+
+        .btn-accent:hover { background: var(--accent); color: #000; }
+
+        /* Full width section */
+        .full-width {
+            grid-column: 1 / -1;
+            background: var(--bg);
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .phase-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+
+        .phase-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .phase-block.current {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .phase-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .phase-dates {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .phase-status {
+            font-size: 0.65rem;
+            margin-top: 0.35rem;
+            font-weight: 500;
+        }
+
+        /* Section header */
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .section-label:first-child { margin-top: 0; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .phase-grid { grid-template-columns: repeat(3, 1fr); }
+            .topbar-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <nav class="topbar">
+        <div class="topbar-left">
+            <div class="logo">SitePM <span>/ Mark</span></div>
+            <nav class="topbar-nav">
+                <a href="#" class="active">Dashboard</a>
+                <a href="#">Projects</a>
+                <a href="#">Snagging</a>
+                <a href="#">Contractors</a>
+                <a href="#">Documents</a>
+                <a href="#">Reports</a>
+            </nav>
+        </div>
+        <div class="user-badge">
+            <span>Mark Palmer</span>
+            <div class="avatar">MP</div>
+        </div>
+    </nav>
+
+    <div class="layout">
+
+        <!-- LEFT PANEL: Projects + Activity -->
+        <div class="panel">
+            
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-number blue">7</div>
+                    <div class="stat-label">Active Sites</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number amber">12</div>
+                    <div class="stat-label">Open Snags</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number green">3</div>
+                    <div class="stat-label">On Track</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number red">2</div>
+                    <div class="stat-label">At Risk</div>
+                </div>
+            </div>
+
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">Active Projects</div>
+                </div>
+                <button class="btn btn-accent">+ New Project</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Meadow Lane – Phase 2 Extension</div>
+                    <span class="badge badge-active">On Track</span>
+                </div>
+                <div class="card-meta">Client: Harrogate Developments · Skipton · £420k</div>
+                <div class="progress-track">
+                    <div class="progress-fill green" style="width: 68%"></div>
+                </div>
+                <div class="progress-label">
+                    <span>Structural works</span>
+                    <span>68%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">The Old Mill – Barn Conversion</div>
+                    <span class="badge badge-attention">Behind</span>
+                </div>
+                <div class="card-meta">Client: Dales Heritage Trust · Settle · £285k</div>
+                <div class="progress-track">
+                    <div class="progress-fill amber" style="width: 41%"></div>
+                </div>
+                <div class="progress-label">
+                    <span>First fix — 8 days behind</span>
+                    <span>41%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Victoria Street – Commercial Refit</div>
+                    <span class="badge badge-critical">At Risk</span>
+                </div>
+                <div class="card-meta">Client: NorthPoint Retail · Leeds · £180k</div>
+                <div class="progress-track">
+                    <div class="progress-fill red" style="width: 23%"></div>
+                </div>
+                <div class="progress-label">
+                    <span>Steelwork delayed — supplier issue</span>
+                    <span>23%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Langcliffe Quarry – Site Offices</div>
+                    <span class="badge badge-active">On Track</span>
+                </div>
+                <div class="card-meta">Client: Tarmac · Langcliffe · £95k</div>
+                <div class="progress-track">
+                    <div class="progress-fill green" style="width: 82%"></div>
+                </div>
+                <div class="progress-label">
+                    <span>Second fix + snagging</span>
+                    <span>82%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Beck House – New Build</div>
+                    <span class="badge badge-upcoming">Planning</span>
+                </div>
+                <div class="card-meta">Client: Private · Giggleswick · £550k</div>
+                <div class="progress-track">
+                    <div class="progress-fill blue" style="width: 12%"></div>
+                </div>
+                <div class="progress-label">
+                    <span>Planning approval pending</span>
+                    <span>12%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Ingleton Community Centre – Refurb</div>
+                    <span class="badge badge-active">On Track</span>
+                </div>
+                <div class="card-meta">Client: YDNPA · Ingleton · £165k</div>
+                <div class="progress-track">
+                    <div class="progress-fill green" style="width: 54%"></div>
+                </div>
+                <div class="progress-label">
+                    <span>M&E rough-in</span>
+                    <span>54%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Airton Farm – Conversion</div>
+                    <span class="badge badge-complete">Complete</span>
+                </div>
+                <div class="card-meta">Client: Private · Airton · £310k</div>
+                <div class="progress-track">
+                    <div class="progress-fill green" style="width: 100%"></div>
+                </div>
+                <div class="progress-label">
+                    <span>Handover complete · Snagging clear</span>
+                    <span>100%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Snags + Contractors + Activity -->
+        <div class="panel">
+            
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">Snagging — Open Items</div>
+                    <div class="panel-subtitle">12 items across 4 sites</div>
+                </div>
+                <button class="btn btn-accent">+ Log Snag</button>
+            </div>
+
+            <div class="snag-item">
+                <div class="snag-priority high"></div>
+                <div class="snag-text">
+                    <div class="snag-title">Fire door closer not engaging — Unit 3</div>
+                    <div class="snag-detail">Victoria Street · Flagged by building control</div>
+                </div>
+                <div class="snag-age">2d ago</div>
+            </div>
+
+            <div class="snag-item">
+                <div class="snag-priority high"></div>
+                <div class="snag-text">
+                    <div class="snag-title">Damp patch on west gable wall</div>
+                    <div class="snag-detail">Old Mill · Needs investigation before plaster</div>
+                </div>
+                <div class="snag-age">1d ago</div>
+            </div>
+
+            <div class="snag-item">
+                <div class="snag-priority medium"></div>
+                <div class="snag-text">
+                    <div class="snag-title">Socket heights wrong in kitchen — 200mm off spec</div>
+                    <div class="snag-detail">Meadow Lane · Electrician aware</div>
+                </div>
+                <div class="snag-age">3d ago</div>
+            </div>
+
+            <div class="snag-item">
+                <div class="snag-priority medium"></div>
+                <div class="snag-text">
+                    <div class="snag-title">Lintel spec mismatch — drawings vs delivered</div>
+                    <div class="snag-detail">Old Mill · Awaiting structural engineer sign-off</div>
+                </div>
+                <div class="snag-age">5d ago</div>
+            </div>
+
+            <div class="snag-item">
+                <div class="snag-priority low"></div>
+                <div class="snag-text">
+                    <div class="snag-title">Tile colour wrong in en-suite — reorder placed</div>
+                    <div class="snag-detail">Langcliffe Quarry · ETA 10 days</div>
+                </div>
+                <div class="snag-age">6d ago</div>
+            </div>
+
+            <div class="snag-item">
+                <div class="snag-priority low"></div>
+                <div class="snag-text">
+                    <div class="snag-title">External render finish inconsistent — south wall</div>
+                    <div class="snag-detail">Ingleton Community Centre · Cosmetic only</div>
+                </div>
+                <div class="snag-age">4d ago</div>
+            </div>
+
+            <!-- Contractors -->
+            <div class="section-label">Contractors on site today</div>
+
+            <div class="contractor-row">
+                <div class="contractor-info">
+                    <div class="contractor-avatar" style="background: var(--green-dim); color: var(--green);">DR</div>
+                    <div>
+                        <div class="contractor-name">Dave Robinson</div>
+                        <div class="contractor-trade">Bricklayer · Meadow Lane</div>
+                    </div>
+                </div>
+                <span class="badge badge-active">On Site</span>
+            </div>
+
+            <div class="contractor-row">
+                <div class="contractor-info">
+                    <div class="contractor-avatar" style="background: var(--blue-dim); color: var(--blue);">ST</div>
+                    <div>
+                        <div class="contractor-name">Spark & Torch Electrical</div>
+                        <div class="contractor-trade">Electrician · Old Mill + Meadow Lane</div>
+                    </div>
+                </div>
+                <span class="badge badge-active">On Site</span>
+            </div>
+
+            <div class="contractor-row">
+                <div class="contractor-info">
+                    <div class="contractor-avatar" style="background: var(--orange-dim); color: var(--orange);">KP</div>
+                    <div>
+                        <div class="contractor-name">K. Proctor Plastering</div>
+                        <div class="contractor-trade">Plasterer · Waiting on damp report</div>
+                    </div>
+                </div>
+                <span class="badge badge-attention">Held</span>
+            </div>
+
+            <div class="contractor-row">
+                <div class="contractor-info">
+                    <div class="contractor-avatar" style="background: var(--accent-dim); color: var(--accent);">YS</div>
+                    <div>
+                        <div class="contractor-name">Yorkshire Steels</div>
+                        <div class="contractor-trade">Steelwork · Victoria Street</div>
+                    </div>
+                </div>
+                <span class="badge badge-critical">Delayed</span>
+            </div>
+
+            <!-- Recent activity -->
+            <div class="section-label">Today's Activity</div>
+
+            <div class="timeline-item">
+                <div class="timeline-time">09:14</div>
+                <div class="timeline-dot active"></div>
+                <div class="timeline-content">
+                    <strong>Site photo uploaded</strong> <span>— Meadow Lane steelwork progress</span>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-time">08:45</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <strong>Snag resolved</strong> <span>— Langcliffe window seal replaced</span>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-time">08:20</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <strong>Delivery confirmed</strong> <span>— Victoria Street steelwork ETA 14 Feb</span>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-time">07:50</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <strong>Site diary entry</strong> <span>— Old Mill: rain delay, team stood down 2hrs</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM: Phase Timeline -->
+        <div class="full-width">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">Meadow Lane — Phase Timeline</div>
+                    <div class="panel-subtitle">Expected completion: 28 March 2026</div>
+                </div>
+            </div>
+            <div class="phase-grid">
+                <div class="phase-block">
+                    <div class="phase-name">Foundations</div>
+                    <div class="phase-dates">4 Nov – 22 Nov</div>
+                    <div class="phase-status" style="color: var(--green);">✓ Complete</div>
+                </div>
+                <div class="phase-block">
+                    <div class="phase-name">Substructure</div>
+                    <div class="phase-dates">25 Nov – 20 Dec</div>
+                    <div class="phase-status" style="color: var(--green);">✓ Complete</div>
+                </div>
+                <div class="phase-block current">
+                    <div class="phase-name">Structural</div>
+                    <div class="phase-dates">6 Jan – 14 Feb</div>
+                    <div class="phase-status" style="color: var(--accent);">● In Progress</div>
+                </div>
+                <div class="phase-block">
+                    <div class="phase-name">First Fix</div>
+                    <div class="phase-dates">17 Feb – 7 Mar</div>
+                    <div class="phase-status" style="color: var(--text-muted);">Upcoming</div>
+                </div>
+                <div class="phase-block">
+                    <div class="phase-name">Second Fix</div>
+                    <div class="phase-dates">10 Mar – 21 Mar</div>
+                    <div class="phase-status" style="color: var(--text-muted);">Upcoming</div>
+                </div>
+                <div class="phase-block">
+                    <div class="phase-name">Snagging</div>
+                    <div class="phase-dates">24 Mar – 28 Mar</div>
+                    <div class="phase-status" style="color: var(--text-muted);">Upcoming</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
